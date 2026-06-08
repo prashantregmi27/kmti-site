@@ -6,12 +6,10 @@ import { sendEnrollmentEmail } from '../utils/mailer.js';
 export const createEnrollment = async (req, res) => {
   try {
     const enrollment = await Enrollment.create(req.body);
-    const emailResult = await sendEnrollmentEmail(req.body);
+    sendEnrollmentEmail(req.body).catch(err => console.error('Background email failed:', err));
     res.status(201).json({
       success: true,
-      message: emailResult
-        ? 'Enrollment submitted successfully! A confirmation email has been sent to your email.'
-        : 'Enrollment submitted successfully! (Could not send confirmation email, but we have your application.)',
+      message: 'Enrollment submitted successfully! A confirmation email will be sent shortly.',
       data: enrollment,
     });
   } catch (err) {

@@ -6,9 +6,9 @@ import { sendContactEmail } from '../utils/mailer.js';
 export const createContact = async (req, res) => {
   try {
     const contact = await Contact.create(req.body);
+    sendContactEmail(req.body).catch(err => console.error('Background email failed:', err));
     const contactValue = (req.body.contact || '').trim();
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactValue);
-    await sendContactEmail(req.body);
     const msg = isEmail
       ? 'Your question has been sent! A confirmation has also been emailed to you. We will reply within 24 hours.'
       : 'Your question has been sent! We will reply within 24 hours.';
