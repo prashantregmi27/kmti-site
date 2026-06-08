@@ -1,17 +1,13 @@
 import Enrollment from '../models/Enrollment.js';
 import { sendEnrollmentEmail } from '../utils/mailer.js';
 
-// @desc   Submit enrollment application
-// @route  POST /api/enrollments
 export const createEnrollment = async (req, res) => {
   try {
     const enrollment = await Enrollment.create(req.body);
-    const emailResult = await sendEnrollmentEmail(req.body);
+    sendEnrollmentEmail(req.body).catch(err => console.error('Background email failed:', err.message));
     res.status(201).json({
       success: true,
-      message: emailResult
-        ? 'Enrollment submitted successfully! A confirmation email has been sent to your email.'
-        : 'Enrollment submitted successfully! (Could not send confirmation email, but we have your application.)',
+      message: 'Enrollment submitted successfully! A confirmation email will be sent shortly.',
       data: enrollment,
     });
   } catch (err) {
@@ -19,8 +15,6 @@ export const createEnrollment = async (req, res) => {
   }
 };
 
-// @desc   Get all enrollments (admin)
-// @route  GET /api/enrollments
 export const getEnrollments = async (req, res) => {
   try {
     const enrollments = await Enrollment.find().sort({ createdAt: -1 });
@@ -30,15 +24,9 @@ export const getEnrollments = async (req, res) => {
   }
 };
 
-// @desc   Update enrollment status (admin)
-// @route  PATCH /api/enrollments/:id
 export const updateEnrollmentStatus = async (req, res) => {
   try {
-    const enrollment = await Enrollment.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
+    const enrollment = await Enrollment.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
     if (!enrollment) return res.status(404).json({ success: false, message: 'Enrollment not found' });
     res.json({ success: true, data: enrollment });
   } catch (err) {
@@ -46,8 +34,6 @@ export const updateEnrollmentStatus = async (req, res) => {
   }
 };
 
-// @desc   Delete enrollment (admin)
-// @route  DELETE /api/enrollments/:id
 export const deleteEnrollment = async (req, res) => {
   try {
     await Enrollment.findByIdAndDelete(req.params.id);
