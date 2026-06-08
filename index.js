@@ -1,4 +1,4 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import express from 'express';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -14,7 +14,6 @@ import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 const distPath = join(__dirname, 'dist');
@@ -30,6 +29,9 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+app.get('/health', (req, res) => res.json({ ok: true }));
+
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 app.use('/api', routes);
 
@@ -41,8 +43,6 @@ if (fs.existsSync(distPath)) {
     }
   });
 }
-
-app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
