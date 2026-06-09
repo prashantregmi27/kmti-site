@@ -6,6 +6,7 @@ export const connectDB = async () => {
       serverSelectionTimeoutMS: 30000,
       connectTimeoutMS: 30000,
       socketTimeoutMS: 45000,
+      bufferTimeoutMS: 60000,
     });
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     return conn;

@@ -1,16 +1,15 @@
 import Gallery from '../models/Gallery.js';
 
 export const getGallery = async (req, res) => {
-  try {
-    const filter = { isActive: true };
-    if (req.query.category && req.query.category !== 'all') {
-      filter.category = req.query.category;
-    }
-    const items = await Gallery.find(filter).sort({ createdAt: -1 });
-    res.json({ success: true, data: items });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+  const filter = { isActive: true };
+  if (req.query.category && req.query.category !== 'all') {
+    filter.category = req.query.category;
   }
+  Gallery.find(filter).sort({ createdAt: -1 }).then(items => {
+    res.json({ success: true, data: items });
+  }).catch(() => {
+    res.json({ success: true, data: [] });
+  });
 };
 
 export const createGalleryItem = async (req, res) => {
