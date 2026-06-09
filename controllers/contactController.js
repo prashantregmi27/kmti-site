@@ -5,14 +5,14 @@ import { sendContactEmail } from '../utils/mailer.js';
 // @route  POST /api/contact
 export const createContact = async (req, res) => {
   try {
-    const contact = await Contact.create(req.body);
+    Contact.create(req.body).catch(err => console.error('Background DB save failed:', err));
     sendContactEmail(req.body).catch(err => console.error('Background email failed:', err));
     const contactValue = (req.body.contact || '').trim();
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactValue);
     const msg = isEmail
       ? 'Your question has been sent! A confirmation has also been emailed to you. We will reply within 24 hours.'
       : 'Your question has been sent! We will reply within 24 hours.';
-    res.status(201).json({ success: true, message: msg, data: contact });
+    res.status(201).json({ success: true, message: msg });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
