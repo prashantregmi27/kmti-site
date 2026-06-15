@@ -18,11 +18,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const distPath = join(__dirname, 'dist');
 
+let dbReady = false;
+
 connectDB().then(async () => {
   await seedSettings();
   await seedSiteContent();
   await updateSettingByKey('social_facebook', 'https://www.facebook.com/share/1cMaJrQcWF/?mibextid=wwXIfr');
-}).catch(err => console.error('Seeding failed:', err.message));
+  dbReady = true;
+  console.log('DB ready');
+}).catch(err => {
+  console.error('DB connection failed:', err.message);
+  dbReady = true; // allow server to serve SPA even without DB
+});
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
@@ -36,6 +43,20 @@ app.use('/uploads', express.static(uploadsDir));
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
+// Wait for DB before accepting API mutations (auth/login works without DB)
+app.use('/api', (req, res, next) => {
+  if (dbReady || req.path === '/auth/login') return next();
+  if (req.method === 'GET') return res.json({ success: true, data: [] });
+  let waited = 0;
+  const iv = setInterval(() => {
+    waited += 200;
+    if (dbReady) { clearInterval(iv); next(); }
+    else if (waited >= 120000) {
+      clearInterval(iv);
+      res.status(503).json({ success: false, message: 'Database not ready, try again' });
+    }
+  }, 200);
+});
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 app.use('/api', routes);
 
