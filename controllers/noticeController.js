@@ -1,27 +1,33 @@
 import Notice from '../models/Notice.js';
 
 export const getNotices = async (req, res) => {
-  const isAdmin = req.query.all === 'true';
-  const filter = isAdmin ? {} : { isActive: true };
-  let query = Notice.find(filter).sort({ createdAt: -1 });
-  if (!isAdmin) query = query.limit(10);
-  query.then(notices => {
+  try {
+    const isAdmin = req.query.all === 'true';
+    const filter = isAdmin ? {} : { isActive: true };
+    const notices = await Notice.find(filter).sort({ createdAt: -1 }).limit(isAdmin ? 0 : 10);
     res.json({ success: true, data: notices });
-  }).catch(() => {
+  } catch (err) {
+    console.error('Get notices failed:', err.message);
     res.json({ success: true, data: [] });
-  });
+  }
 };
 
 export const createNotice = async (req, res) => {
-  res.status(201).json({ success: true, data: { ...req.body, _id: 'pending' } });
-  Notice.create(req.body).catch(err => {
+  try {
+    const notice = await Notice.create(req.body);
+    res.status(201).json({ success: true, data: notice });
+  } catch (err) {
     console.error('Notice save failed:', err.message);
-  });
+    res.status(500).json({ success: false, message: 'Failed to save notice' });
+  }
 };
 
 export const deleteNotice = async (req, res) => {
-  res.json({ success: true, message: 'Notice deleted' });
-  Notice.findByIdAndDelete(req.params.id).catch(err => {
+  try {
+    await Notice.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Notice deleted' });
+  } catch (err) {
     console.error('Notice delete failed:', err.message);
-  });
+    res.status(500).json({ success: false, message: 'Failed to delete notice' });
+  }
 };
