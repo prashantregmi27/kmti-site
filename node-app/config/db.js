@@ -8,12 +8,11 @@ export const connectDB = async () => {
       serverSelectionTimeoutMS: 60000,
       connectTimeoutMS: 30000,
       socketTimeoutMS: 45000,
-      bufferTimeoutMS: 120000,
     });
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error.message);
+    console.error('❌ MongoDB connection failed:', error.message);
     return null;
   }
 };
