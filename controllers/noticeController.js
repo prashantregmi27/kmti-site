@@ -13,19 +13,17 @@ export const getNotices = async (req, res) => {
 };
 
 export const createNotice = async (req, res) => {
-  try {
-    const notice = await Notice.create(req.body);
+  Notice.create(req.body).then(notice => {
     res.status(201).json({ success: true, data: notice });
-  } catch (err) {
+  }).catch(err => {
     res.status(400).json({ success: false, message: err.message });
-  }
+  });
 };
 
 export const deleteNotice = async (req, res) => {
-  try {
-    await Notice.findByIdAndDelete(req.params.id);
+  Notice.findByIdAndDelete(req.params.id).then(() => {
     res.json({ success: true, message: 'Notice deleted' });
-  } catch (err) {
+  }).catch(err => {
     res.status(500).json({ success: false, message: err.message });
-  }
+  });
 };
