@@ -26,8 +26,13 @@ const COLLEGE = {
 };
 
 const createTransport = () => {
-  const useSmtp = process.env.EMAIL_USER && process.env.EMAIL_PASS;
-  if (useSmtp) {
+  if (process.env.HOSTINGER_EMAIL_USER && process.env.HOSTINGER_EMAIL_PASS) {
+    return nodemailer.createTransport({
+      host: 'smtp.hostinger.com', port: 465, secure: true,
+      auth: { user: process.env.HOSTINGER_EMAIL_USER, pass: process.env.HOSTINGER_EMAIL_PASS },
+    });
+  }
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     return nodemailer.createTransport({
       host: 'smtp.gmail.com', port: 587, secure: false,
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
