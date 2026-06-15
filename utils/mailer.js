@@ -217,7 +217,9 @@ export const sendContactEmail = async (data) => {
       });
       console.log(`Contact confirmation sent to ${contactValue}`);
     }
+    return true;
   } catch (err) {
     console.error('Failed to send contact email:', err.message);
+    return false;
   }
 };
